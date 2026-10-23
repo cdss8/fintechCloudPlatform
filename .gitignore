@@ -1,5 +1,11 @@
+#node
 node_modules/
 .env
 .env.*
 !.env.example
 
+
+#py
+.venv/
+__pycache__/
+*.py[cod]
