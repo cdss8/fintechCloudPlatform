@@ -17,13 +17,13 @@ app.get('/', (_req, res) => {
 
 
 //Endpoint for k8s
-app.get('/secure3DT', (_req, res) => {
-    res.status(200).json({ status:"secureTransaction", timestamp: new Date })
+app.get('/secure3ds', (_req, res) => {
+    res.status(200).json({ status:"TransactionIsSecure", timestamp: new Date })
 })
 
 
 //Transaction Simulation
-app.post('/api/transaction',(_req, res)=>{
+app.post('/transaction',(_req, res)=>{
     const { F12_ID, IBAN, amount, currency } = res.body;
 
     const riskScore = Math.floor(Math.random()*100)
