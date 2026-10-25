@@ -1,0 +1,23 @@
+services:
+  data:
+    build:
+      context: ./data
+    container_name: fintechData
+    expose:
+      - "8001"
+    networks: -fintech-network
+
+  server:
+    build:
+      context: ./server
+    container_name: fintechServer
+    ports:
+      - "3000:3000"
+    environment:
+      PYTHON_SERVICE_URL: http://data:8001
+      depends_on: data
+    networks: -fintech-network
+
+  networks:
+  fintech-network:
+    driver: bridge

@@ -1,48 +1,86 @@
 const Express = require('express')
 const Cors = require('cors')
 const transID = require('node:crypto')
-
+const pyServiceURL = process.env.PYTHON_SERVICE_URL
 
 const app = Express()
 const PORT = 3000
 
-
 app.use(Cors())
 app.use(Express.json())
 
-
-app.get('/', (_req, res) => {
+app.get('/', (req, res) => {
     res.send('Welcome to the simple transacctional API')
 })
 
 
 //Endpoint for k8s
-app.get('/secure3ds', (_req, res) => {
+app.get('/secure3ds', (req, res) => {
     res.status(200).json({ status:"TransactionIsSecure", timestamp: new Date })
 })
 
 
 //Transaction Simulation
-app.post('/transaction',(_req, res)=>{
-    const { F12_ID, IBAN, amount, currency } = res.body;
+app.post('/api/transaction', async (req, res) => {
+    try {
+        const { F12_ID, IBAN, amount, currency } = req.body;
 
-    const riskScore = Math.floor(Math.random()*100)
-    const isFraudulent = riskScore > 80;
+        const transaction = {
+            F12_ID,
+            IBAN,
+            amount,
+            currency: currency || 'USD'
+        };
 
-    res.json({
-        transactionID: `SWIFTXXXBANK_${transID()}`,
-        accountID: F12_ID || 'NO REGISTERED IN THE SYSTEM',
-        account: IBAN,
-        amount,
-        currency: currency || 'USD',
-        riskPoint: riskScore,
-        status:isFraudulent,
-        timeProcessed: new Date()
-    })
-})
+        // Ask the Python service to analyze the transaction
+        const analysis = await analyzeTransaction(transaction);
 
+        res.json({
+            transactionID: `SWIFTXXXBANK_${transID.randomUUID()}`,
+            accountID: F12_ID || 'NO REGISTERED IN THE SYSTEM',
+            account: IBAN,
+            amount,
+            currency: currency || 'USD',
+            riskPoint: analysis.risk_score,
+            status: analysis.status,
+            timeProcessed: new Date()
+        });
 
+    } catch (error) {
+        console.error('Transaction analysis failed:', error.message);
+
+        res.status(502).json({
+            error: 'Could not analyze transaction',
+            details: error.message
+        });
+    }
+});
 
 app.listen(PORT, ()=>{
    console.log('server running propoerly in port ' + PORT)
 })
+
+
+if (!process.env.PYTHON_SERVICE_URL) {
+    console.warn('PYTHON_SERVICE_URL is not configured');
+}
+async function analyzeTransaction(transaction) {
+    const response = await fetch(
+        `${pyServiceURL}/api/v1/analyze`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(transaction),
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            `Python service returned ${response.status}`
+        );
+    }
+
+    return await response.json();
+}
