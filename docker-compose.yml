@@ -5,7 +5,8 @@ services:
     container_name: fintechData
     expose:
       - "8001"
-    networks: -fintech-network
+    networks: 
+      - fintech-network
 
   server:
     build:
@@ -15,9 +16,11 @@ services:
       - "3000:3000"
     environment:
       PYTHON_SERVICE_URL: http://data:8001
-      depends_on: data
-    networks: -fintech-network
+    depends_on:
+      - data
+    networks: 
+      - fintech-network
 
-  networks:
+networks:
   fintech-network:
     driver: bridge

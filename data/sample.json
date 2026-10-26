@@ -1,0 +1,23 @@
+[
+    {
+    "customer":"J. Ortega",
+    "flexcubeID":"38362546XXX0065",
+    "IBAN":"HU12345545456789986XXX",
+    "amount":100,
+    "currency":"EUR"
+    },
+    {
+    "customer":"V. Oshimen",
+    "flexcubeID":"315362546XXX0035",
+    "IBAN":"US76335454453123456789XXX",
+    "amount":100,
+    "currency":"EUR"
+    },
+    {
+    "customer":"F. Zimbardo",
+    "flexcubeID":"39862546XXX0028",
+    "IBAN":"US76333454545523456789XXX",
+    "amount":100,
+    "currency":"EUR"
+    }
+]

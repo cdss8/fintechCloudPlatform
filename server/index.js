@@ -23,10 +23,11 @@ app.get('/secure3ds', (req, res) => {
 //Transaction Simulation
 app.post('/api/transaction', async (req, res) => {
     try {
-        const { F12_ID, IBAN, amount, currency } = req.body;
+        const { customer, flexcubeID, IBAN, amount, currency } = req.body;
 
         const transaction = {
-            F12_ID,
+            customer,
+            flexcubeID,
             IBAN,
             amount,
             currency: currency || 'USD'
@@ -35,16 +36,17 @@ app.post('/api/transaction', async (req, res) => {
         // Ask the Python service to analyze the transaction
         const analysis = await analyzeTransaction(transaction);
 
-        res.json({
-            transactionID: `SWIFTXXXBANK_${transID.randomUUID()}`,
-            accountID: F12_ID || 'NO REGISTERED IN THE SYSTEM',
-            account: IBAN,
-            amount,
-            currency: currency || 'USD',
-            riskPoint: analysis.risk_score,
-            status: analysis.status,
-            timeProcessed: new Date()
-        });
+    res.json({
+        transactionID: `SWIFTXXXBANK_${transID.randomUUID()}`,
+        customer,
+        accountID: flexcubeID || 'NO REGISTERED IN THE SYSTEM',
+        account: IBAN,
+        amount,
+        currency: currency || 'USD',
+        riskPoint: analysis.risk_score,
+        status: analysis.status,
+        timeProcessed: new Date()
+    });
 
     } catch (error) {
         console.error('Transaction analysis failed:', error.message);
